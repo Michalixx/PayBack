@@ -4,7 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -12,11 +15,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int PICK_IMAGE = 100;
+    Uri imageUri;
 
 
 
@@ -32,15 +43,149 @@ public class MainActivity extends AppCompatActivity {
 
     public static ArrayList<Person> data = new ArrayList<>();
 
+    public int tmpVal = -1;
+
+    public static boolean firstTime = true;
+
+
+    public void saveData(){
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(data);
+        editor.putString("data", json);
+        editor.apply();
+    }
+
+    public void loadSavedData(){
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("data", null);
+        Type type = new TypeToken<ArrayList<Person>>() {}.getType();
+        data = gson.fromJson(json, type);
+
+        if (data == null) {
+            data = new ArrayList<Person>();
+        }
+
+    }
+
+
+    private void openGallery() {
+        Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        startActivityForResult(gallery, PICK_IMAGE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data2){
+        super.onActivityResult(requestCode, resultCode, data2);
+        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE){
+            imageUri = data2.getData();
+            data.get(tmpVal).setImg(imageUri);
+            imageViewArray[tmpVal].setImageURI(imageUri);
+            saveData();
+        }}
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if(firstTime){
+            loadSavedData();
+            firstTime = false;
+        }
+
+        saveData();
         connectId();
         //loadData();
         updateView();
 
+
+        imageViewArray[0].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tmpVal = 0;
+                openGallery();
+            }
+        });
+
+        imageViewArray[1].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tmpVal = 1;
+                openGallery();
+            }
+        });
+
+        imageViewArray[2].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tmpVal = 2;
+                openGallery();
+            }
+        });
+
+        imageViewArray[3].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tmpVal = 3;
+                openGallery();
+            }
+        });
+
+        imageViewArray[4].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tmpVal = 4;
+                openGallery();
+            }
+        });
+
+        imageViewArray[5].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tmpVal = 5;
+                openGallery();
+            }
+        });
+
+        imageViewArray[6].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tmpVal = 6;
+                openGallery();
+            }
+        });
+
+        imageViewArray[7].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tmpVal = 7;
+                openGallery();
+            }
+        });
+
+        imageViewArray[8].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tmpVal = 8;
+                openGallery();
+            }
+        });
+
+        imageViewArray[9].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tmpVal = 9;
+                openGallery();
+            }
+        });
+
+
+        //Buttons listeners
         addButtonArray[0].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -48,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra(EXTRA_PERSON, 0);
                 intent.putExtra(EXTRA_WHAT, 0);
                 startActivity(intent);
+
             }
         });
 
@@ -244,6 +390,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -285,6 +434,10 @@ public class MainActivity extends AppCompatActivity {
 
             nameArray[i].setText(data.get(i).getName());
             moneyArray[i].setText(data.get(i).getMoney());
+
+            if(data.get(i).isImgSet()){
+                imageViewArray[i].setImageURI(data.get(i).getImg());
+            }
 
         }
         for(int i = data.size(); i < 10; i++){
